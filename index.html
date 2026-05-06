@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Code Translator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+        .container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        textarea {
+            width: 100%;
+            height: 120px;
+            padding: 10px;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 16px;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        select, button {
+            padding: 10px 15px;
+            font-size: 16px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        label {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Code Translator</h1>
+    <div class="container">
+        <label for="inputText">Input Text:</label>
+        <textarea id="inputText" placeholder="Type your text, binary, or morse code here..."></textarea>
+
+        <div class="controls">
+            <div>
+                <label for="mode">Translation Mode: </label>
+                <select id="mode">
+                    <option value="text2bin">English to Binary</option>
+                    <option value="bin2text">Binary to English</option>
+                    <option value="text2morse">English to Morse Code</option>
+                    <option value="morse2text">Morse Code to English</option>
+                </select>
+            </div>
+            <button onclick="translateText()">Translate</button>
+        </div>
+
+        <label for="outputText">Output:</label>
+        <textarea id="outputText" readonly placeholder="Translation will appear here..."></textarea>
+    </div>
+
+    <script>
+        // Morse Code Dictionary
+        const morseDict = {
+            'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..', 'E': '.', 'F': '..-.',
+            'G': '--.', 'H': '....', 'I': '..', 'J': '.---', 'K': '-.-', 'L': '.-..',
+            'M': '--', 'N': '-.', 'O': '---', 'P': '.--.', 'Q': '--.-', 'R': '.-.',
+            'S': '...', 'T': '-', 'U': '..-', 'V': '...-', 'W': '.--', 'X': '-..-',
+            'Y': '-.--', 'Z': '--..', '1': '.----', '2': '..---', '3': '...--',
+            '4': '....-', '5': '.....', '6': '-....', '7': '--...', '8': '---..',
+            '9': '----.', '0': '-----', ', ': '--..--', '.': '.-.-.-', '?': '..--..',
+            '/': '-..-.', '-': '-....-', '(': '-.--.', ')': '-.--.-'
+        };
+
+        // Create a reverse dictionary for Morse to Text
+        const reverseMorseDict = Object.fromEntries(Object.entries(morseDict).map(([k, v]) => [v, k]));
+
+        function translateText() {
+            const input = document.getElementById('inputText').value;
+            const mode = document.getElementById('mode').value;
+            let output = '';
+
+            try {
+                if (mode === 'text2bin') {
+                    output = input.split('').map(char => {
+                        return char.charCodeAt(0).toString(2).padStart(8, '0');
+                    }).join(' ');
+                } 
+                else if (mode === 'bin2text') {
+                    output = input.trim().split(/\s+/).map(bin => {
+                        return String.fromCharCode(parseInt(bin, 2));
+                    }).join('');
+                } 
+                else if (mode === 'text2morse') {
+                    output = input.toUpperCase().split('').map(char => {
+                        if (char === ' ') return '/'; // Use slash for word breaks
+                        return morseDict[char] || char; // Leave unknown chars as is
+                    }).join(' ');
+                } 
+                else if (mode === 'morse2text') {
+                    output = input.trim().split(/\s+/).map(code => {
+                        if (code === '/') return ' '; // Slash indicates space
+                        return reverseMorseDict[code] || code;
+                    }).join('');
+                }
+                
+                document.getElementById('outputText').value = output;
+            } catch (error) {
+                document.getElementById('outputText').value = "Error: Invalid input format for the selected translation mode.";
+            }
+        }
+    </script>
+</body>
+</html>
